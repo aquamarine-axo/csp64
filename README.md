@@ -24,7 +24,7 @@ Pull requests, bug reports and feature requests are more than welcome! But, plea
 
 ## building
 
-Want to beta test? See [building.md](building.md) for details. **does not exist right now!**
+Want to beta test? See [building.md](building.md) for details.
 
 ## footer
 
