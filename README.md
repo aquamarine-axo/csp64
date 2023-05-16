@@ -28,5 +28,5 @@ Want to beta test? See [building.md](BUILDING.md) for details.
 
 ## footer
 
-- See the license: [LICENSE](LICENSE)
+- See the license: [MIT license](LICENSE.txt)
 - Support Furnace: [https://github.com/tildearrow/furnace](https://github.com/tildearrow/furnace)
