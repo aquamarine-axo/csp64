@@ -42,14 +42,28 @@ startloop:
 
     inc $d020 // border colour
     jsr sidtick
-    dec $d020 // border colour
+    dec $d020 // border colour pt2
 
 sidtick:
     ldx #$00 // data offset
     lda $1000,x // csp data
 
-// TODO: implement player routine
+    // determine if the current command is a note-on command
+    adc #$4b
+    bvc playnote // if overflow occurs, it's not a note-on (continue)
+
+// TODO: add routines for all of the other commands here
 
     rts
+
+playnote:
+    // here's the deal:
+    // $00 to $b4 are note-ons
+    // $00 being C--5, $b3 being B-9
+    // so we need to do `cmp $4b` to check if it's a null note on and `rts` if it is, do nothing.
+
+// TODO: everything else!
+
+    rts // playnote is not a subroutine so this still works
 
 *=$1000 // CSP data follows
