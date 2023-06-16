@@ -15,19 +15,21 @@ if not exist "../kickass/kickass.jar" (
     echo Please place it in a folder named "kickass" that is 1 layer below the source code for csp64. The Kick Assembler JAR should should be here: '../kickass/kickass.jar'
     exit /b 1
 ) 
-if exist "main.prg" (
+if exist "src/asm/main.prg" (
     del main.prg
     echo main.prg was already built... deleting and replacing.
-    if exist "main.sym" (
+    if exist "src/asm/main.sym" (
         del main.sym
         echo main.sym was already built... deleting and replacing.
     )
 )
 
 cd ../kickass
-kickass.jar ../csp64/main.asm
-cd ../csp64
+kickass.jar ../csp64/src/asm/main.asm
 
+cd ../csp64
 if not exist "main.prg" (
     echo Errors were generated during building. But I don't know why KickAss won't show me any output...
+) else (
+    echo Bulid files have been generated in '/src/asm' (this is a temporary location... I need to move this script to Unix so that it's easier to use gcc for the packer)
 )
