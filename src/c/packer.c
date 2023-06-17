@@ -34,13 +34,13 @@ unsigned short calcFreqBase(double region, double divider, int note, bool period
         notebase * (region / region));
 }
 
-int cnvrtFNumBlock(int bf, int bits, int note) {
+int cnvrtFNumBlock(int bf, int bits, int note, double divider, double region) {
     //double tuning=song.tuning
-    if (tuning < 400) { tuning = 400 };
-    if (tuning > 500) { tuning = 500 };
+    if (tuning < 400) { tuning = 400; };
+    if (tuning > 500) { tuning = 500; };
 
-    int boundaryBottom = tuning * pow(2, 0.25) * (divider / clock);
-    int boundaryTop = 2 * tuning * pow(2, 0.25) * (divider / clock);
+    int boundaryBottom = tuning * pow(2, 0.25) * (divider / region);
+    int boundaryTop= 2 * tuning * pow(2, 0.25) * (divider / region);
 
     while (boundaryTop > ((1 << bits) - 1)) {
         boundaryTop >> = 1;
@@ -88,7 +88,7 @@ unsigned short calcFreq(int base, int pitch, int arp, bool arpIsFixed, bool peri
             round((region / freqBase) / divider):
             round(freqBase * (divider / region));
         
-        if (blockBits > 0) { cnvrtFNumBlock(bf, blockBits, notebase >> 7); }
+        if (blockBits > 0) { cnvrtFNumBlock(bf, blockBits, notebase >> 7, region, divider); }
         else { return bf; }
     }
 
