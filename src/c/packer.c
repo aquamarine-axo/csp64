@@ -16,7 +16,8 @@ bool pitchMacroIsLinear = 1;
 int reversePitchTable[4096]; // TODO: figure out how to populate this...
 int pitchTable[4096]; // this too
 
-void main() {
+int main() {
+    return 0;
     // todo: use the functions!!
 }
 
