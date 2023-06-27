@@ -12,12 +12,12 @@
 # csp64 ROM builder bashfile
 # nicco1690, 2023
 
-if [ ! -f "../kickass/kickass.jar"]; then
+if [ ! -f "../kickass/KickAss.jar" ]; then
     echo -e "Kick Assembler was not located!"
-    echo -e "Please place it in a folder named 'kickass' that is one layer below the source code for csp64. The Kick Assembler JAR should be here: '../kickass/kickass.jar"
+    echo -e "Please place it in a folder named 'kickass' that is one layer below the source code for csp64. The Kick Assembler JAR should be here: '../kickass/KickAss.jar"
     exit 1 
 fi
-if [ -f "src/asm/main.prg"]; then
+if [ -f "src/asm/main.prg" ]; then
     cd src/asm/
     rm main.prg
     echo -e "main.prg was already built... deleting and replacing."
@@ -29,7 +29,7 @@ if [ -f "src/asm/main.prg"]; then
 fi
 
 cd ../kickass
-java -jar kickass.jar ../csp64/src/asm/main.asm
+java -jar KickAss.jar ../csp64/src/asm/main.asm
 
 cd ../csp64
 if [ ! -f "main.prg" ]; then
