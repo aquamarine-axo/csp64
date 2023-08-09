@@ -1,10 +1,11 @@
 /* CSP64 packer program -- nicco1690 and contributors, 2023 */
 /* see the LICENSE file in the root of the source code for license information. */
 
+#include <stdlib.h>
+#include <math.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <math.h>
 
 // TODO: take the needed values from the module and pass them in
 char linearPitch = 2;
@@ -15,11 +16,6 @@ bool pitchMacroIsLinear = 1;
 
 int reversePitchTable[4096]; // TODO: figure out how to populate this...
 int pitchTable[4096]; // this too
-
-int main() {
-    return 0;
-    // todo: use the functions!!
-}
 
 // the following is a reimplementation of Furnace's tuning formula.
 // if they look similar, it's because I need this to be exactly compatible with Furnace's tuning.
@@ -36,7 +32,6 @@ unsigned short calcFreqBase(double region, double divider, int note, bool period
 }
 
 int cnvrtFNumBlock(int bf, int bits, int note, double divider, double region) {
-    //double tuning=song.tuning
     if (tuning < 400) { tuning = 400; };
     if (tuning > 500) { tuning = 500; };
 
@@ -44,26 +39,26 @@ int cnvrtFNumBlock(int bf, int bits, int note, double divider, double region) {
     int boundaryTop= 2 * tuning * pow(2, 0.25) * (divider / region);
 
     while (boundaryTop > ((1 << bits) - 1)) {
-        boundaryTop >> = 1;
-        boundaryBottom >> = 1;
+        boundaryTop >>= 1;
+        boundaryBottom >>= 1;
     }
 
     int block = (note) / 12;
     if (block < 0) { block = 0; }
     if (block > 7) { block = 7; }
 
-    bf >> = block;
+    bf >>= block;
     if (bf < 0) { bf = 0; }
 
     // octave boundaries
     while (bf > 0 && bf < boundaryBottom && block > 0) {
-        block << = 1;
+        block <<= 1;
         block--;
     }
 
     if (bf > boundaryTop) {
         while (block < 7 && bf > boundaryTop) {
-            bf >> = 1;
+            bf >>= 1;
             block++;
         }
         if (bf > ((1 << bits) - 1)) {
@@ -118,4 +113,9 @@ unsigned short calcFreq(int base, int pitch, int arp, bool arpIsFixed, bool peri
     return period? // for regular pitch settings
         base - pitch - pitch2:
         base + ((pitch * octave) >> 1) + pitch2;
+}
+
+int main() {
+    return 0;
+    // todo: use the functions!!
 }

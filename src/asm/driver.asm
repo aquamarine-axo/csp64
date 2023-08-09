@@ -10,8 +10,12 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 // I have heavily commented this file so that anyone who might want to make changes can easily understand my thought process when writing this code.
 
-    *=$0801
+.const csp_curchan    = $bc00
+.const csp_delaytick1 = $bc01
+.const csp_delaytick2 = $bc02
+.const csp_delaytick3 = $bc03
 
+    *=$0801
 // 10 SYS 2304 ($0900)
 .byte $0C,$08,$0A,$00,$9E,$20,$32,$30,$36,$34,$00,$00,$00
 
@@ -62,12 +66,16 @@ playnote:
     // $00 being C--5, $b3 being B-9
     // so we need to do `cmp $4b` to check if it's a null note on and `rts` if it is, do nothing.
 
-// TODO: everything else!
+    ldx csp_curchan // current channel that is being processed is stored here
+    ldy #$02
+    sty #$bc01 // delay before note-on
 
     rts // playnote is not a subroutine so this still works
 
 *=$0e00 // Pitch data follows
-// TODO: un-hardcode this
+
+    // the deal part two:
+    // this table is populated by the packer program. as such, it should be left blank.
     //    c     c#    d     d#    e     f     f#    g     g#    a     a#    b
     .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // -5
     .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // -4

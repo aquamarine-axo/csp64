@@ -13,8 +13,8 @@
 # nicco1690, 2023
 
 if [ ! -f "../kickass/KickAss.jar" ]; then
-    echo -e "Kick Assembler was not located!"
-    echo -e "Please place it in a folder named 'kickass' that is one layer below the source code for csp64. The Kick Assembler JAR should be here: '../kickass/KickAss.jar"
+    echo -e "\033[38;5;196mhelloKick Assembler was not located!"
+    echo -e "\033[38;5;163mhelloPlease place it in a folder named 'kickass' that is one layer below the source code for csp64. The Kick Assembler JAR should be here: '../kickass/KickAss.jar"
     exit 1 
 fi
 if [ -f "src/asm/main.prg" ]; then
