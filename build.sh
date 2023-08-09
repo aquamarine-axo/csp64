@@ -12,6 +12,16 @@
 # csp64 ROM builder bashfile
 # nicco1690, 2023
 
+if [ ! command -v java &> /dev/null ]; then
+    echo -e "Java appears to not be installed."
+    echo -e "You can fix this by compiling, for example, OpenJDK from source, or by installing it from your package manager of choice."
+    exit 1
+fi
+if [ ! command -v gcc &> /dev/null ]; then
+    echo -e "gcc appears to not be installed."
+    echo -e "You can fix this by compiling, for example, gcc from source, or by installing it from your package manager of choice."
+    exit 1
+fi
 if [ ! -f "../kickass/KickAss.jar" ]; then
     echo -e "\033[38;5;196mhelloKick Assembler was not located!"
     echo -e "\033[38;5;163mhelloPlease place it in a folder named 'kickass' that is one layer below the source code for csp64. The Kick Assembler JAR should be here: '../kickass/KickAss.jar"
@@ -28,12 +38,23 @@ if [ -f "src/asm/main.prg" ]; then
     cd ../../
 fi
 
+# Compile the packer
+cd src/c
+gcc -lm -o packer packer.c
+cd ../..
+
+# Compile the driver
 cd ../kickass
 java -jar KickAss.jar ../csp64/src/asm/main.asm
 
+# Move the binaries into the build folder
 cd ../csp64
-if [ ! -f "main.prg" ]; then
-    echo -e "Errors were generated duing building. But I don't know why KickAss won't show me any output..."
-else
-    echo -e "Build files have been generated in '/src/asm' (this is a temporary location, will be changed in the future.)"
-fi 
+rm -rf build/
+mkdir build
+cd build
+mv src/asm/main.prg .
+echo -e "Moved main.prg to build folder"
+mv src/c/packer .
+echo -e "Moved main.prg to build folder"
+
+echo -e "Build completed with no errors."
