@@ -68,13 +68,13 @@ int cnvrtFNumBlock(int bf, int bits, int note, double divider, double region) {
     return bf | (block << bits);
 }
 
-                     // functions that look like this is why I don't like modern programming in general
+// functions that look like this is why I don't like modern programming in general
 unsigned short calcFreq(int base, int pitch, int arp, bool arpIsFixed, bool period, int octave, int pitch2, double region, double divider, int blockBits) {
     if (linearPitch==2) {
         int notebase = base + pitch + pitch2;
         if (!oldArpStrategy) {
             if (arpIsFixed) { notebase = (arp << 7) + pitch + pitch2; }
-            else          { notebase += arp << 7; }
+            else { notebase += arp << 7; }
         }
         double freqBase = (period?
             (tuning * 0.0625):
@@ -88,7 +88,7 @@ unsigned short calcFreq(int base, int pitch, int arp, bool arpIsFixed, bool peri
         else { return bf; }
     }
 
-    if (linearPitch == 1) { // preferable this should be unsupported...
+    if (linearPitch == 1) { // preferably this should be unsupported...
         int linearPitchHelper = (1024 + (globalPitch << 6) - (globalPitch < 0? globalPitch - 6:0));
         if (linearPitchHelper < 1) { linearPitchHelper = 1; } // division by zero workaround
         if (pitchMacroIsLinear) { pitch += pitch2; }
@@ -116,6 +116,11 @@ unsigned short calcFreq(int base, int pitch, int arp, bool arpIsFixed, bool peri
 }
 
 int main() {
+    //        parameters: clock div note period
+    int bf = calcFreqBase(985248, 1, 83, false);
+    printf("cnvrt fnum block: %x",bf);4
+
+    // parameters: bf, bits, note, divider, region
+
     return 0;
-    // todo: use the functions!!
 }
