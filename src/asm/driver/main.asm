@@ -10,16 +10,22 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 // I have heavily commented this file so that anyone who might want to make changes can easily understand my thought process when writing this code.
 
-.const csp_curchan    = $bc00
-.const csp_delaytick1 = $bc01
-.const csp_delaytick2 = $bc02
-.const csp_delaytick3 = $bc03
 
-    *=$0801
+// TODO: Move these into csp.asm
+.const csp_curchan    = $bc00
+.const csp_chn1_delay = $bc01
+.const csp_chn2_delay = $bc02
+.const csp_chn3_delay = $bc03
+
+.import source "../defines/c64_hardware.asm"
+//.import source "../defines/c64_kernel.asm"
+//.import source "../defines/csp.asm"
+
+    *=$0801 "BASIC Loader"
 // 10 SYS 2304 ($0900)
 .byte $0C,$08,$0A,$00,$9E,$20,$32,$30,$36,$34,$00,$00,$00
 
-    *=$0810
+    *=$0810 "Program"
     jsr resetsid
     jsr startloop
 
@@ -54,25 +60,32 @@ sidtick:
 
     // determine if the current command is a note-on command
     adc #$4b
-    bvc playnote // if overflow occurs, it's not a note-on (continue)
+    bvc note_on // if overflow occurs, it's not a note-on (continue)
 
 // TODO: add routines for all of the other commands here
-
     rts
 
-playnote:
+note_on:
     // here's the deal:
     // $00 to $b4 are note-ons
     // $00 being C--5, $b3 being B-9
     // so we need to do `cmp $4b` to check if it's a null note on and `rts` if it is, do nothing.
 
-    ldx csp_curchan // current channel that is being processed is stored here
-    ldy #$02
-    sty #$bc01 // delay before note-on
+    // TODO: IMPLEMENT INSTRUMENTS!!
+
+    cpx #$4b
+    beq [note_on+69] // TODO: change the number when I'm done coding the routine
+            //   ^^     this number represents the address of the code that follows loading the note                 
+    stx c64_vo1_freqh // TODO: this is a temporary address. I need to process it and get the real frequency
+
+    lda %10000000 // voice on, no waveform
 
     rts // playnote is not a subroutine so this still works
 
-*=$0e00 // Pitch data follows
+pre_note:
+    // TODO
+
+*=$0e00 "Dummy pitch table"
 
     // the deal part two:
     // this table is populated by the packer program. as such, it should be left blank.
@@ -92,4 +105,4 @@ playnote:
     .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // 7
     .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // 8
 
-*=$1000 // CSP data follows
+*=$1000 "Command Stream data"
