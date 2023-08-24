@@ -11,7 +11,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 // I have heavily commented this file so that anyone who might want to make changes can easily understand my thought process when writing this code.
 
 
-// TODO: Move these into csp.asm
+// TODO: Move these into ../defines/csp.asm
 .const csp_curchan    = $bc00
 .const csp_chn1_delay = $bc01
 .const csp_chn2_delay = $bc02
@@ -48,7 +48,7 @@ resetsidloop:
 startloop:
     lda $d012 // get rasterline
     cmp #$1f
-    bne startloop // A is no longer 
+    bne startloop // A is no longer needed
 
     inc $d020 // border colour
     jsr sidtick
@@ -66,43 +66,71 @@ sidtick:
     rts
 
 note_on:
-    // here's the deal:
-    // $00 to $b4 are note-ons
-    // $00 being C--5, $b3 being B-9
-    // so we need to do `cmp $4b` to check if it's a null note on and `rts` if it is, do nothing.
-
+    // we need to do `cmp $4b` to check if it's a null note on and note-on but don't change the frequency
     // TODO: IMPLEMENT INSTRUMENTS!!
 
     cpx #$4b
-    beq [note_on+69] // TODO: change the number when I'm done coding the routine
-            //   ^^     this number represents the address of the code that follows loading the note                 
-    stx c64_vo1_freqh // TODO: this is a temporary address. I need to process it and get the real frequency
+    beq [note_on+3] // << this number represents the address of the code that follows loading the note frequency. this is for null note ons.
+                 
+    jsr get_note_fq // we now have X and Y as the frequency
 
     lda %10000000 // voice on, no waveform
 
     rts // playnote is not a subroutine so this still works
 
+get_note_fq: // X is passed in as the note to use
+    txa
+    asl // A is multiplied by two, carry = bit that won't fit
+    tax // value looks like this: %cxxxxxxxx (c=carry, x=x reg)
+    
+    ldy $0e00,x // frequency low byte
+    lda $0e01,x // frequency high byte
+    tax
+
+    bcc [get_note_fq + 10] // inc this value when I add more
+    rts
+
+set_note_fq: // y = frequency low byte, x = frequency high byte
+    sty c64_vo1_freql
+    stx c64_vo1_freqh
+    rts
+
 pre_note:
-    // TODO
+    /* Here is the chart that I used to understand pre_note:
+        00 | C-4
+        01 | ...
+        02 | C-4
+        translates into:
+        row 0 : tick 0: NOTE_ON C-4
+                tick 1: ...
+                tick 2: ...
+        row 1 : tick 3: PRE_NOTE    $BC01+(value of $BC00) = 2
+                tick 4: ...         $BC01+(value of $BC00) = 1
+                tick 5: ...         $BC01+(value of $BC00) = 0 - HARD RESET and GATE/TEST
+        row 2:  tick 6: NOTE_ON C-4
+                ...
+    */
+    rts
 
 *=$0e00 "Dummy pitch table"
 
     // the deal part two:
     // this table is populated by the packer program. as such, it should be left blank.
-    //    c     c#    d     d#    e     f     f#    g     g#    a     a#    b
-    .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // -5
-    .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // -4
-    .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // -3
-    .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // -2
-    .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // -1
-    .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // -0
-    .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // 1
-    .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // 2
-    .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // 3
-    .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // 4
-    .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // 5
-    .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // 6
-    .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // 7
-    .byte $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 // 8
+    //    c       c#      d       d#      e       f       f#      g       g#      a       a#      b
+    .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 // -5  00-0b
+    .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 // -4  0c-17
+    .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 // -3  18-23
+    .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 // -2  24-2f
+    .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 // -1  30-3b
+    .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 // 0   3c-47
+    .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 // 1   48-53
+    .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 // 2   54-5f
+    .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 // 3   60-6b
+    .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 // 4   6c-77
+    .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 // 5   78-83
+    .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 // 6   84-8f
+    .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 // 7   90-9b
+    .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 // 8   9c-a7
+    .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 // 9   a8-b3
 
 *=$1000 "Command Stream data"
