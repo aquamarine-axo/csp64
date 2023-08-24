@@ -73,6 +73,7 @@ note_on:
     beq [note_on+3] // << this number represents the address of the code that follows loading the note frequency. this is for null note ons.
                  
     jsr get_note_fq // we now have X and Y as the frequency
+    jsr set_note_fq // frequency set!!!!
 
     lda %10000000 // voice on, no waveform
 
@@ -89,6 +90,13 @@ get_note_fq: // X is passed in as the note to use
 
     bcc [get_note_fq + 10] // inc this value when I add more
     rts
+    // only get here if the value is >=256
+    ldy $0f00,x // lsb
+    lda $0f01,x // msb
+    tax
+
+    rts
+
 
 set_note_fq: // y = frequency low byte, x = frequency high byte
     sty c64_vo1_freql
