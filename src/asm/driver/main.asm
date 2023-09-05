@@ -17,9 +17,9 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 .const csp_chn2_delay = $bc02
 .const csp_chn3_delay = $bc03
 
-.import source "../defines/c64_hardware.asm"
-//.import source "../defines/c64_kernel.asm"
-//.import source "../defines/csp.asm"
+#import "../defines/c64_hardware.asm"
+//#import "../defines/c64_kernel.asm"
+//#import "../defines/csp.asm"
 
     *=$0801 "BASIC Loader"
 // 10 SYS 2304 ($0900)
@@ -88,7 +88,7 @@ get_note_fq: // X is passed in as the note to use
     lda $0e01,x // frequency high byte
     tax
 
-    bcc [get_note_fq + 10] // inc this value when I add more
+    bcc [get_note_fq + 14] // inc this value when I add more
     rts
     // only get here if the value is >=256
     ldy $0f00,x // lsb
@@ -96,7 +96,6 @@ get_note_fq: // X is passed in as the note to use
     tax
 
     rts
-
 
 set_note_fq: // y = frequency low byte, x = frequency high byte
     sty c64_vo1_freql
