@@ -8,18 +8,9 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// I have heavily commented this file so that anyone who might want to make changes can easily understand my thought process when writing this code.
-
-
-// TODO: Move these into ../defines/csp.asm
-.const csp_curchan    = $bc00
-.const csp_chn1_delay = $bc01
-.const csp_chn2_delay = $bc02
-.const csp_chn3_delay = $bc03
-
-#import "../defines/c64_hardware.asm"
-//#import "../defines/c64_kernel.asm"
-//#import "../defines/csp.asm"
+#import "../defines/hardware.asm"
+#import "../defines/kernel.asm"
+#import "../defines/csp.asm"
 
     *=$0801 "BASIC Loader"
 // 10 SYS 2304 ($0900)
@@ -36,7 +27,7 @@ resetsid:
 
 resetsidloop:
     lda #$00 // reset the value of a
-    sta $d400,x
+    sta sid_base_addr,x
     inx
 
     tya
@@ -46,13 +37,13 @@ resetsidloop:
     rts // otherwise, exit subroutine
 
 startloop:
-    lda $d012 // get rasterline
+    lda c64_rastr_lin // get rasterline
     cmp #$1f
     bne startloop // A is no longer needed
 
-    inc $d020 // border colour
+    inc c64_bdr_color // border colour
     jsr sidtick
-    dec $d020 // border colour pt2
+    dec c64_bdr_color // border colour pt2
 
 sidtick:
     ldx #$00 // data offset
